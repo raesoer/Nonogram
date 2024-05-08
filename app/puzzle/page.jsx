@@ -1,14 +1,22 @@
+"use client";
+
 // TODO:
 // Make table scrollable with fixed left clues
 
 import styles from "./page.module.css";
+import { useState } from "react";
 
-function GridCell({ id, value }) {
+function GridCell({ id, state, onGridCellClick }) {
+  const bgColor = state == 1 ? "black" : "white";
+  //console.log(bgColor);
   return (
     <td key={"td-" + id}>
-      <button key={"b-" + id} className={styles.square}>
-        {value}
-      </button>
+      <button
+        key={"b-" + id}
+        className={styles.square}
+        style={{ backgroundColor: bgColor }}
+        onClick={onGridCellClick}
+      ></button>
     </td>
   );
 }
@@ -27,6 +35,12 @@ function ClueCell({ id, clues }) {
 function Puzzle({ puzzle }) {
   const width = puzzle[0].length;
   const height = puzzle.length;
+
+  const [gridState, setGridState] = useState(
+    Array.from({ length: height }, () =>
+      Array.from({ length: width }, () => 0),
+    ),
+  );
 
   // top clues
   const topClues = [];
@@ -62,33 +76,45 @@ function Puzzle({ puzzle }) {
     leftClues.push(clues);
   }
 
+  function handleClick(i, j) {
+    const nextGridState = gridState.slice();
+    console.log(i.toString() + "-" + j.toString());
+    console.log(nextGridState[i][j]);
+    if (nextGridState[i][j] == 0) {
+      nextGridState[i][j] = 1;
+    } else {
+      nextGridState[i][j] = 0;
+    }
+    setGridState(nextGridState);
+    console.log(gridState);
+  }
+
   return (
     <table className={styles.puzzle}>
       <tbody>
-        <tr key="tr-0">
+        <tr key="tr-0" className={styles.toprow}>
           <td key="td-0" />
           {topClues.map((clues, index) => (
             <ClueCell
               key={"tc" + (index + 1).toString()}
               id={"tc" + (index + 1).toString()}
               clues={clues}
-              horizontal={false}
             />
           ))}
         </tr>
-        {leftClues.map((clues, index) => (
-          <tr key={"tr-" + (index + 1).toString()}>
+        {leftClues.map((clues, i) => (
+          <tr key={"tr-" + (i + 1).toString()} className={styles.mainrow}>
             <ClueCell
-              key={"lc" + (index + 1).toString()}
-              id={"lc" + (index + 1).toString()}
+              key={"lc" + (i + 1).toString()}
+              id={"lc" + (i + 1).toString()}
               clues={clues}
-              horizontal={true}
             />
-            {puzzle[index].split("").map((value, i) => (
+            {puzzle[i].split("").map((value, j) => (
               <GridCell
-                key={"g-" + (index + 1).toString() + "-" + (i + 1).toString()}
-                id={"g-" + (index + 1).toString() + "-" + (i + 1).toString()}
-                value={value}
+                key={"g-" + (i + 1).toString() + "-" + (j + 1).toString()}
+                id={"g-" + (i + 1).toString() + "-" + (j + 1).toString()}
+                state={gridState[i][j]}
+                onGridCellClick={() => handleClick(i, j)}
               />
             ))}
           </tr>

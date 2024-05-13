@@ -1,13 +1,21 @@
 "use client";
 
 // TODO:
+// Add X toggle option
+// Turn red if wrong
+// Add tick to row / col when correct
+// drag block
 // Make table scrollable with fixed left clues
+// Build API to return puzzles with titles
+// Color versions
 
+import { useState, useEffect } from "react";
 import styles from "./page.module.css";
-import { useState } from "react";
+import Image from "next/image";
+import instructionPng from "./nongram-instructions.png";
 
 function GridCell({ id, state, onGridCellClick }) {
-  const bgColor = state == 1 ? "black" : "white";
+  const bgColor = state == 1 ? "darkturquoise" : "white";
   //console.log(bgColor);
   return (
     <td key={"td-" + id}>
@@ -32,9 +40,45 @@ function ClueCell({ id, clues }) {
   );
 }
 
-function Puzzle({ puzzle }) {
+function Words() {
+  return (
+    <>
+      <div className={styles.heading}>
+        Nonogram / Griddler / Japanese puzzle / Tsunami
+      </div>
+      <div className={styles.intro}>
+        <p>
+          Lots of different names for the same puzzle. Use the digits to create
+          a pattern in the grid. Each number represents a block of squares to be
+          blacked out in that row or column.
+        </p>
+        <p>
+          <a href="#div-1">Example below</a>
+        </p>
+      </div>
+    </>
+  );
+}
+
+function Example() {
+  return (
+    <div id="div-1" className={styles.instructions}>
+      <p>Example</p>
+      <Image src={instructionPng} alt="Instructions" />
+    </div>
+  );
+}
+
+function Puzzle({ puzzle, title }) {
   const width = puzzle[0].length;
   const height = puzzle.length;
+
+  // const [words, setWords] = useState({
+  //   heading: "",
+  //   intro: "",
+  //   link: "",
+  //   result: "",
+  // });
 
   const [gridState, setGridState] = useState(
     Array.from({ length: height }, () =>
@@ -78,62 +122,113 @@ function Puzzle({ puzzle }) {
 
   function handleClick(i, j) {
     const nextGridState = gridState.slice();
-    console.log(i.toString() + "-" + j.toString());
-    console.log(nextGridState[i][j]);
     if (nextGridState[i][j] == 0) {
       nextGridState[i][j] = 1;
     } else {
       nextGridState[i][j] = 0;
     }
     setGridState(nextGridState);
-    console.log(gridState);
   }
 
+  const done = calculateDone(puzzle, gridState);
+  let result;
+  if (done) {
+    result = "That's it! Puzzle complete. Title: " + title;
+  } else {
+    result = "";
+  }
+
+  // useEffect(() => {
+  //   setWords({
+  //     heading: "Nonogram / Griddler / Japanese puzzle / Tsunami",
+  //     intro:
+  //       "Lots of different names for the same puzzle." +
+  //       "Use the digits to create a pattern in the grid." +
+  //       "Each number represents a block of squares" +
+  //       "to be blacked out in that row or column.",
+  //     link: "Example below",
+  //     result: result,
+  //   });
+  // }, [result]);
+
   return (
-    <table className={styles.puzzle}>
-      <tbody>
-        <tr key="tr-0" className={styles.toprow}>
-          <td key="td-0" />
-          {topClues.map((clues, index) => (
-            <ClueCell
-              key={"tc" + (index + 1).toString()}
-              id={"tc" + (index + 1).toString()}
-              clues={clues}
-            />
-          ))}
-        </tr>
-        {leftClues.map((clues, i) => (
-          <tr key={"tr-" + (i + 1).toString()} className={styles.mainrow}>
-            <ClueCell
-              key={"lc" + (i + 1).toString()}
-              id={"lc" + (i + 1).toString()}
-              clues={clues}
-            />
-            {puzzle[i].split("").map((value, j) => (
-              <GridCell
-                key={"g-" + (i + 1).toString() + "-" + (j + 1).toString()}
-                id={"g-" + (i + 1).toString() + "-" + (j + 1).toString()}
-                state={gridState[i][j]}
-                onGridCellClick={() => handleClick(i, j)}
+    <>
+      <Words />
+      <div className={styles.result}>{result}</div>
+      <table className={styles.puzzle}>
+        <tbody>
+          <tr key="tr-0" className={styles.toprow}>
+            <td key="td-0" />
+            {topClues.map((clues, index) => (
+              <ClueCell
+                key={"tc" + (index + 1).toString()}
+                id={"tc" + (index + 1).toString()}
+                clues={clues}
               />
             ))}
           </tr>
-        ))}
-      </tbody>
-    </table>
+          {leftClues.map((clues, i) => (
+            <tr key={"tr-" + (i + 1).toString()} className={styles.mainrow}>
+              <ClueCell
+                key={"lc" + (i + 1).toString()}
+                id={"lc" + (i + 1).toString()}
+                clues={clues}
+              />
+              {puzzle[i].split("").map((value, j) => (
+                <GridCell
+                  key={"g-" + (i + 1).toString() + "-" + (j + 1).toString()}
+                  id={"g-" + (i + 1).toString() + "-" + (j + 1).toString()}
+                  state={gridState[i][j]}
+                  onGridCellClick={() => handleClick(i, j)}
+                />
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <br />
+      <Example />
+    </>
   );
 }
 
-const PUZZLE = [
-  "0101010",
-  "0111110",
-  "0100010",
-  "0000000",
-  "1111111",
-  "0101010",
-  "0101010",
-];
+function calculateDone(puzzle, gridState) {
+  for (let i = 0; i < gridState.length; i++) {
+    let stateRow = "";
+    for (let j = 0; j < gridState[i].length; j++) {
+      stateRow = stateRow + gridState[i][j];
+    }
+    //console.log(puzzle[i]);
+    //console.log(stateRow);
+    if (puzzle[i] != stateRow) {
+      return false;
+    }
+  }
+  return true;
+}
+
+const PUZZLE = ["010", "011", "010", "010"];
+const TITLE = "TEST";
+
+// const PUZZLE = [
+//   "00000111100000",
+//   "00011111111000",
+//   "00111111111100",
+//   "01110011110010",
+//   "01111001111000",
+//   "01111001111000",
+//   "11100001100001",
+//   "11110011110011",
+//   "11111111111111",
+//   "11111111111111",
+//   "11111111111111",
+//   "11111111111111",
+//   "11111111111111",
+//   "11110111101111",
+//   "01100011000110",
+// ];
+// const TITLE = "INKY";
 
 export default function App() {
-  return <Puzzle puzzle={PUZZLE} />;
+  return <Puzzle puzzle={PUZZLE} title={TITLE} />;
 }

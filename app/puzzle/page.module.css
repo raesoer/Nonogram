@@ -8,7 +8,8 @@
 }
 
 .puzzle {
-  margin-left: 10px;
+  margin-left: auto;
+  margin-right: auto;
   margin-top: 10px;
 }
 
@@ -42,4 +43,45 @@
   font-size: 10px;
   text-align: center;
   background-color: white;
+}
+
+.heading {
+  width: 100%;
+  text-align: center;
+  font-size: 22px;
+  font-weight: bold;
+  color: darkviolet;
+  padding: 5px;
+  margin-bottom: 10px;
+}
+
+.intro {
+  width: 100%;
+  text-align: center;
+  padding: 5px;
+}
+
+.intro a {
+  color: darkviolet;
+  text-decoration: underline;
+}
+
+.result {
+  width: 100%;
+  text-align: center;
+  font-weight: bold;
+  color: darkred;
+  padding: 10px;
+}
+
+.instructions {
+  width: 100%;
+  text-align: center;
+  font-weight: bold;
+  color: darkviolet;
+  padding: 10px;
+}
+
+.instructions p {
+  padding: 10px;
 }

@@ -61,6 +61,11 @@
   padding: 5px;
 }
 
+.intro p {
+  padding-left: 30px;
+  padding-right: 30px;
+}
+
 .intro a {
   color: darkviolet;
   text-decoration: underline;

@@ -2,20 +2,24 @@
 
 // TODO:
 // Add X toggle option
-// Turn red if wrong
 // Add tick to row / col when correct
 // drag block
 // Make table scrollable with fixed left clues
 // Build API to return puzzles with titles
 // Color versions
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import styles from "./page.module.css";
 import Image from "next/image";
 import instructionPng from "./nongram-instructions.png";
 
-function GridCell({ id, state, onGridCellClick }) {
-  const bgColor = state == 1 ? "darkturquoise" : "white";
+function GridCell({ id, state, puzzleState, onGridCellClick }) {
+  const bgColor =
+    state == 1 && puzzleState == 0
+      ? "darkred"
+      : state == 1
+        ? "darkturquoise"
+        : "white";
   //console.log(bgColor);
   return (
     <td key={"td-" + id}>
@@ -50,10 +54,10 @@ function Words() {
         <p>
           Lots of different names for the same puzzle. Use the digits to create
           a pattern in the grid. Each number represents a block of squares to be
-          blacked out in that row or column.
+          blacked out in that row or column. Incorrect selections will turn red.
         </p>
         <p>
-          <a href="#div-1">Example below</a>
+          <a href="#example">Example below</a>
         </p>
       </div>
     </>
@@ -62,7 +66,7 @@ function Words() {
 
 function Example() {
   return (
-    <div id="div-1" className={styles.instructions}>
+    <div id="example" className={styles.instructions}>
       <p>Example</p>
       <Image src={instructionPng} alt="Instructions" />
     </div>
@@ -72,13 +76,6 @@ function Example() {
 function Puzzle({ puzzle, title }) {
   const width = puzzle[0].length;
   const height = puzzle.length;
-
-  // const [words, setWords] = useState({
-  //   heading: "",
-  //   intro: "",
-  //   link: "",
-  //   result: "",
-  // });
 
   const [gridState, setGridState] = useState(
     Array.from({ length: height }, () =>
@@ -138,19 +135,6 @@ function Puzzle({ puzzle, title }) {
     result = "";
   }
 
-  // useEffect(() => {
-  //   setWords({
-  //     heading: "Nonogram / Griddler / Japanese puzzle / Tsunami",
-  //     intro:
-  //       "Lots of different names for the same puzzle." +
-  //       "Use the digits to create a pattern in the grid." +
-  //       "Each number represents a block of squares" +
-  //       "to be blacked out in that row or column.",
-  //     link: "Example below",
-  //     result: result,
-  //   });
-  // }, [result]);
-
   return (
     <>
       <Words />
@@ -179,6 +163,7 @@ function Puzzle({ puzzle, title }) {
                   key={"g-" + (i + 1).toString() + "-" + (j + 1).toString()}
                   id={"g-" + (i + 1).toString() + "-" + (j + 1).toString()}
                   state={gridState[i][j]}
+                  puzzleState={puzzle[i][j]}
                   onGridCellClick={() => handleClick(i, j)}
                 />
               ))}

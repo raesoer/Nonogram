@@ -144,7 +144,7 @@ function Puzzle({ puzzle, title }) {
   const done = calculateDone(puzzle, gridState);
   let result;
   if (done) {
-    result = "That's it! Puzzle complete. Title: " + title;
+    result = "Puzzle complete! Title " + title;
   } else {
     result = "";
   }
@@ -229,5 +229,5 @@ const PUZZLE = [
 const TITLE = "INKY";
 
 export default function App() {
-  return <Puzzle puzzle={PUZZLE} title={TITLE} />;
+  return <Puzzle puzzle={PUZZLE} title={TITLE} suppressHydrationWarning />;
 }

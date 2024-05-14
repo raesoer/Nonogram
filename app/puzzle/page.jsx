@@ -2,7 +2,6 @@
 
 // TODO:
 // Add X toggle option
-// Add tick to row / col when correct
 // drag block
 // Make table scrollable with fixed left clues
 // Build API to return puzzles with titles
@@ -16,7 +15,7 @@ import instructionPng from "./nongram-instructions.png";
 function GridCell({ id, state, puzzleState, onGridCellClick }) {
   const bgColor =
     state == 1 && puzzleState == 0
-      ? "darkred"
+      ? "crimson"
       : state == 1
         ? "darkturquoise"
         : "white";
@@ -37,7 +36,13 @@ function ClueCell({ id, clues }) {
   //console.log(clues);
   return (
     <td key={"td-" + id}>
-      {clues.map((clue, index) => (
+      <div
+        style={{ visibility: clues.complete ? "visible" : "hidden" }}
+        className={styles.complete}
+      >
+        &#10003;
+      </div>
+      {clues.clues.map((clue, index) => (
         <div key={"d-" + id + "-" + index}>{clue}</div>
       ))}
     </td>
@@ -47,14 +52,15 @@ function ClueCell({ id, clues }) {
 function Words() {
   return (
     <>
-      <div className={styles.heading}>
-        Nonogram / Griddler / Japanese puzzle / Tsunami
+      <div key="d-heading" className={styles.heading}>
+        Nonogram &#47; Griddler &#47; Japanese puzzle &#47; Tsunami
       </div>
-      <div className={styles.intro}>
+      <div key="d-intro" className={styles.intro}>
         <p>
           Lots of different names for the same puzzle. Use the digits to create
           a pattern in the grid. Each number represents a block of squares to be
           blacked out in that row or column. Incorrect selections will turn red.
+          Completed rows and columns will have a tick added.
         </p>
         <p>
           <a href="#example">Example below</a>
@@ -83,40 +89,6 @@ function Puzzle({ puzzle, title }) {
     ),
   );
 
-  // top clues
-  const topClues = [];
-  for (let i = 0; i < width; i++) {
-    let clues = [];
-    let count = 0;
-    for (let j = 0; j < height; j++) {
-      let clue = puzzle[j][i];
-      if (clue == "1") count = count + 1;
-      else {
-        if (count > 0) clues.push(count);
-        count = 0;
-      }
-      if (j == height - 1 && count > 0) clues.push(count);
-    }
-    topClues.push(clues);
-  }
-
-  // left clues
-  const leftClues = [];
-  for (let i = 0; i < height; i++) {
-    let clues = [];
-    let count = 0;
-    for (let j = 0; j < width; j++) {
-      let clue = puzzle[i][j];
-      if (clue == "1") count = count + 1;
-      else {
-        if (count > 0) clues.push(count);
-        count = 0;
-      }
-      if (j == width - 1 && count > 0) clues.push(count);
-    }
-    leftClues.push(clues);
-  }
-
   function handleClick(i, j) {
     const nextGridState = gridState.slice();
     if (nextGridState[i][j] == 0) {
@@ -126,6 +98,48 @@ function Puzzle({ puzzle, title }) {
     }
     setGridState(nextGridState);
   }
+
+  let leftClues = () => {
+    let result = [];
+    for (let i = 0; i < height; i++) {
+      let clues = [];
+      let count = 0;
+      let complete = true;
+      for (let j = 0; j < width; j++) {
+        let clue = puzzle[i][j];
+        if (clue == "1") count = count + 1;
+        else {
+          if (count > 0) clues.push(count);
+          count = 0;
+        }
+        if (j == width - 1 && count > 0) clues.push(count);
+        if (complete && clue != gridState[i][j]) complete = false;
+      }
+      result.push({ clues: clues, complete: complete });
+    }
+    return result;
+  };
+
+  const topClues = () => {
+    let result = [];
+    for (let i = 0; i < width; i++) {
+      let clues = [];
+      let count = 0;
+      let complete = true;
+      for (let j = 0; j < height; j++) {
+        let clue = puzzle[j][i];
+        if (clue == "1") count = count + 1;
+        else {
+          if (count > 0) clues.push(count);
+          count = 0;
+        }
+        if (j == height - 1 && count > 0) clues.push(count);
+        if (complete && clue != gridState[j][i]) complete = false;
+      }
+      result.push({ clues: clues, complete: complete });
+    }
+    return result;
+  };
 
   const done = calculateDone(puzzle, gridState);
   let result;
@@ -143,7 +157,7 @@ function Puzzle({ puzzle, title }) {
         <tbody>
           <tr key="tr-0" className={styles.toprow}>
             <td key="td-0" />
-            {topClues.map((clues, index) => (
+            {topClues().map((clues, index) => (
               <ClueCell
                 key={"tc" + (index + 1).toString()}
                 id={"tc" + (index + 1).toString()}
@@ -151,7 +165,7 @@ function Puzzle({ puzzle, title }) {
               />
             ))}
           </tr>
-          {leftClues.map((clues, i) => (
+          {leftClues().map((clues, i) => (
             <tr key={"tr-" + (i + 1).toString()} className={styles.mainrow}>
               <ClueCell
                 key={"lc" + (i + 1).toString()}
@@ -192,27 +206,27 @@ function calculateDone(puzzle, gridState) {
   return true;
 }
 
-const PUZZLE = ["010", "011", "010", "010"];
-const TITLE = "TEST";
+// const PUZZLE = ["010", "011", "010", "010"];
+// const TITLE = "TEST";
 
-// const PUZZLE = [
-//   "00000111100000",
-//   "00011111111000",
-//   "00111111111100",
-//   "01110011110010",
-//   "01111001111000",
-//   "01111001111000",
-//   "11100001100001",
-//   "11110011110011",
-//   "11111111111111",
-//   "11111111111111",
-//   "11111111111111",
-//   "11111111111111",
-//   "11111111111111",
-//   "11110111101111",
-//   "01100011000110",
-// ];
-// const TITLE = "INKY";
+const PUZZLE = [
+  "00000111100000",
+  "00011111111000",
+  "00111111111100",
+  "01110011110010",
+  "01111001111000",
+  "01111001111000",
+  "11100001100001",
+  "11110011110011",
+  "11111111111111",
+  "11111111111111",
+  "11111111111111",
+  "11111111111111",
+  "11111111111111",
+  "11110111101111",
+  "01100011000110",
+];
+const TITLE = "INKY";
 
 export default function App() {
   return <Puzzle puzzle={PUZZLE} title={TITLE} />;

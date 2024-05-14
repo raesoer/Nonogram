@@ -59,8 +59,8 @@ function Words() {
         <p>
           Lots of different names for the same puzzle. Use the digits to create
           a pattern in the grid. Each number represents a block of squares to be
-          blacked out in that row or column. Incorrect selections will turn red.
-          Completed rows and columns will have a tick added.
+          coloured blue in that row or column. Incorrect selections will turn
+          red. Completed rows and columns will have a little tick added.
         </p>
         <p>
           <a href="#example">Example below</a>
